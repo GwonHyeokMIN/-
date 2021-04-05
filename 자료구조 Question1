@@ -1,0 +1,18 @@
+Sentence= "Kyungpook National University (abbreviated as KNU or Kyungdae)\
+is a national university representing Daegu Metropolitan City and Gyeongbuk\
+Province in South Korea. It is located in the Daegu Metropolitan City, which\
+is the capital city of the GyeongbukProvince, South Korea. (Kyungpook in the \
+university's name represents an oldromanization of the province's name, \
+now most commonly spelled Gyeongbuk.)"
+
+print("문장은 %s 입니다."%Sentence)
+print("문장에 존재하는 문자의 갯수를 찾는 프로그램입니다.")
+input("")
+      
+while True:
+    letter=input("검색할 단어를 입력해주세요(대소문자 구별)\n또는 종료하고 싶으시면 End를 입력해주세요.")
+    if letter=='End':
+        break
+    count= Sentence.count(letter)
+    print("========%s 는 %d개 만큼 있습니다.========" %(letter,count))
+    
