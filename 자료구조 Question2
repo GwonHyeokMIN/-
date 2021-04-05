@@ -90,13 +90,22 @@ def printNode():
     print("]")
 
 def reverseNode():
-    global end
-    current1 = end
-    print("Reverse(Data):[\"",current1.data,"\"",end="")
-    while current1.prev !=None:
-        current1 =current1.prev
-        print(", \"",current1.data,"\"",end="")
-    print("]")
+    global head,end
+    vare=end
+    varh=head
+    end=varh
+    head=vare
+    vare.next=vare.prev
+    vare.prev=None
+    varh.prev=varh.next
+    while (vare!=varh.next):
+        vare=vare.next
+        savevar=vare.next
+        vare.next=vare.prev
+        vare.prev=savevar
+    varh.next=None
+    del(vare)
+    printNode()
         
 node1=Node()
 node1.data="apple"
