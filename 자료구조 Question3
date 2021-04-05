@@ -70,6 +70,88 @@ def stackarray():
 SIZE=10     #Queuearray,Queuecircular랑 같이 사용#
 array=[None,None,None,None,None,None,None,None,None,None]  #Queuearray, Queuecircular랑 같이 사용#
 toparray=-1
+#=============================================================================================#
+class Node():
+    def __init__(self):
+        self.data=None
+        self.link=None
+
+def printlist(top):
+    current1 = top
+    print("Data:",current1.data,end="")
+    while current1.link !=None:
+        current1 =current1.link
+        print(", ",current1.data,end="")
+    print("\n")
+def deletelist(current,top):
+
+    current1=current.link
+    top.link=current1
+    del(current)
+    current=current1
+    top.data-=1
+    
+def stacklist():
+    top=Node()
+    top.data=0
+    head=top
+    current=top
+    end=top
+    
+    while True:
+        expr=input("[,{,(,<,>,),},]을 입력 하십시오:")
+        if ((expr=="[")or(expr=="{"))or((expr=="(")or(expr=="<")):
+            newnode=Node()
+            newnode.data=expr
+            if current == top:
+                top.link = newnode
+                current=newnode
+                end=newnode
+                top.data+=1
+                printlist(top)
+            elif current != top:
+                newnode.link = current
+                top.link = newnode
+                current = newnode
+                top.data+=1
+                printlist(top)
+
+        elif ((expr=="]")or(expr=="}"))or((expr==")")or(expr==">")):
+            if current == top:
+                top.data-=1
+                printlist(top)
+                print("False")
+                break
+            elif ((expr=="]")and(top.link.data=="[")):
+                deletelist(top.link,top)
+                printlist(top)
+                print("True")
+                if top.data==0:
+                    break
+
+            elif ((expr=="}")and(top.link.data=="{")):
+                deletelist(top.link,top)
+                printlist(top)
+                print("True")
+                if top.data==0:
+                    break
+            elif ((expr==")")and(top.link.data=="(")):
+                deletelist(top.link,top)
+                printlist(top)
+                print("True")
+                if top.data==0:
+                    break
+            elif ((expr==">")and(top.link.data=="<")):
+                deletelist(top.link,top)
+                printlist(top)
+                print("Ture")
+                if top.data==0:
+                    break
+            else:
+                printlist(top)
+                print("False")
+                break
+
 #=============================================================================================#         
 def isQueueFull():
     global SIZE,array,reararray
@@ -111,7 +193,7 @@ def deQueue():
 def Queuearray():
     global SIZE,array,reararray
     while True:
-        vara=(input("1.손님 예약, 2.예약 손님  입장")
+        vara=(input("1.손님 예약, 2.예약 손님  입장"))
         if vara=="1":
             name=input("예약하시는 손님의 이름을 적어주십시오")
             enQueue(name)
@@ -179,10 +261,6 @@ def Queuecircular():
 rear=9
 front=9
 #=============================================================================================#
-class Node():
-    def __init__(self):
-        self.data=None
-        self.link=None
 def isQueueEmptylist():
     global frontlist,rearlist
     if (frontlist.data==None)and(rearlist.data==None)==1:
@@ -243,7 +321,7 @@ def deQueuelist():
 def Queuelist():
     global frontlist,rearlist
     while True:
-        varl=(input("1.손님 예약, 2.예약손님 입장")
+        varl=(input("1.손님 예약, 2.예약손님 입장"))
         if varl=="1":
             name=input("예약하시는 손님의 이름을 적어주십시오")
             enQueuelist(name)
@@ -262,6 +340,9 @@ while True:
 
     if var=="1":
         stackarray()
+
+    elif var=="2":
+        stacklist()
 
     elif var=="3":
         Queuearray()
