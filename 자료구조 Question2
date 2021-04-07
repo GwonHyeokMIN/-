@@ -6,7 +6,7 @@ class Node():
 
 def insertNode(): 
     global head,end                    
-    vari=input("1.head insert, 2.middle insert, 3.end insert"  
+    vari=input("1.head insert, 2.middle insert, 3.end insert")
     insertData=input("추가하실 노드의 데이터를 입력해주십시오:")
     if vari=="1":                        
         newnode=Node()                 
@@ -35,18 +35,20 @@ def insertNode():
         end.next=newnode             
         end=newnode
     else:
-        print("1~3의 숫자만 입력 하십시오."
+        print("1~3의 숫자만 입력 하십시오.")
 
 def deleteNode():
     global head,end                                                 
     deleteData=input("제거하실 노드의 데이터를 입력해주십시오:")
-    if head.data==deleteData:     
+    if head.next==end:
+        print("더이상 제거 하실수 없습니다.")
+
+    elif head.data==deleteData:     
         current=head.next         
         current.prev=None         
         head.next=None            
         del(head)                 
-        head=current              
-        return                                  
+        head=current                                              
     
     elif end.data==deleteData:      
         current=end.prev          
@@ -54,7 +56,6 @@ def deleteNode():
         current.next=None
         del(end)
         end=current
-        return
 
     elif ((head.data != deleteData)and(end.data != deleteData)):
         current=head
@@ -65,7 +66,7 @@ def deleteNode():
         current1.next=current2
         current2.prev=current1
         del(current)
-        return
+
 
 def searchNode():
     global head
@@ -104,7 +105,6 @@ def reverseNode():
         vare.next=vare.prev
         vare.prev=savevar
     varh.next=None
-    del(vare)
     printNode()
         
 node1=Node()
