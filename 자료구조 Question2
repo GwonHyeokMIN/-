@@ -4,67 +4,67 @@ class Node():
         self.next=None
         self.prev=None
 
-def insertNode():
-    global head,end
-    vari=int(input("1.head insert, 2.middle insert, 3.end insert"))
+def insertNode(): 
+    global head,end                    
+    vari=input("1.head insert, 2.middle insert, 3.end insert"  
     insertData=input("추가하실 노드의 데이터를 입력해주십시오:")
-    if vari==1:
-        newnode=Node()
-        newnode.data=insertData
-        newnode.next=head
-        head.prev=newnode
-        head=newnode
+    if vari=="1":                        
+        newnode=Node()                 
+        newnode.data=insertData        
+        newnode.next=head              
+        head.prev=newnode              
+        head=newnode                  
 
-    if vari==2:
-        prevData=input("추가하실 노드의 prev 노드를 입력 해주십시오:")
-        current1=head
-        while current1.data!=prevData:
+    elif vari=="2":                                                          
+        prevData=input("추가하실 노드의 prev 노드를 입력 해주십시오:")   
+        current1=head                                                    
+        while current1.data!=prevData:                                  
             current1=current1.next
-        current2=current1.next
-        newnode=Node()
+        current2=current1.next                                           
+        newnode=Node()                                                   
         newnode.data=insertData
-        newnode.next=current2
+        newnode.next=current2                                           
         current2.prev=newnode
-        newnode.prev=current1
-        current1.next=newnode
-        
-    if vari==3:
-        newnode=Node()
-        newnode.data=insertData
-        newnode.prev=end
-        end.next=newnode
+        newnode.prev=current1                                            
+        current1.next=newnode                                            
+                                                                         
+    elif vari=="3":                      
+        newnode=Node()               
+        newnode.data=insertData      
+        newnode.prev=end             
+        end.next=newnode             
         end=newnode
+    else:
+        print("1~3의 숫자만 입력 하십시오."
 
 def deleteNode():
-    global head,end
+    global head,end                                                 
     deleteData=input("제거하실 노드의 데이터를 입력해주십시오:")
-    if head.data==deleteData:
-        current1=head
-        current2=head.next
-        current1.next=None
-        current2.prev=None
-        del(current1)
-        head=current2
-        return
+    if head.data==deleteData:     
+        current=head.next         
+        current.prev=None         
+        head.next=None            
+        del(head)                 
+        head=current              
+        return                                  
     
-    if end.data==deleteData:
-        current3=end
-        current4=end.prev
-        current3.prev=None
-        current4.next=None
-        del(current3)
-        end=current4
+    elif end.data==deleteData:      
+        current=end.prev          
+        end.prev=None
+        current.next=None
+        del(end)
+        end=current
         return
 
-    if ((head.data != deleteData)and(end.data != deleteData)):
-        current5=head
-        while current5.data!=deleteData:
-            current5=current5.next
-        current6=current5.prev
-        current7=current5.next
-        current6.next=current7
-        current7.prev=current6
-        del(current5)
+    elif ((head.data != deleteData)and(end.data != deleteData)):
+        current=head
+        while current.data!=deleteData:
+            current=current.next
+        current1=current.prev
+        current2=current.next
+        current1.next=current2
+        current2.prev=current1
+        del(current)
         return
 
 def searchNode():
@@ -77,16 +77,16 @@ def searchNode():
             break
     if current.data!=searchData:
         print("no")
-    if current.data==searchData:
+    elif current.data==searchData:
         print("yes")
     
 def printNode():
     global head
-    current1 = head
-    print("Data:[\"",current1.data,"\"",end="")
-    while current1.next !=None:
-        current1 =current1.next
-        print(", \"",current1.data,"\"",end="")
+    current = head
+    print("Data:[\"",current.data,"\"",end="")
+    while current.next !=None:
+        current =current.next
+        print(", \"",current.data,"\"",end="")
     print("]")
 
 def reverseNode():
@@ -153,4 +153,3 @@ while True:
     else:
         print("1~6의 숫자만 입력 하십시오")
         
-
