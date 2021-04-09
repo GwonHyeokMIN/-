@@ -193,14 +193,16 @@ def deQueue():
 def Queuearray():
     global SIZE,array,reararray
     while True:
-        vara=(input("1.손님 예약, 2.예약 손님  입장"))
+        vara=(input("1.손님 예약, 2.예약 손님  입장, 3.종료"))
         if vara=="1":
             name=input("예약하시는 손님의 이름을 적어주십시오")
             enQueue(name)
         elif vara=="2":
             deQueue()
+        elif vara=="3":
+            return
         else:
-            print("1~2의 숫자만 입력 하십시오.")
+            print("1~3의 숫자만 입력 하십시오.")
         
 reararray=-1
 #=============================================================================================#
@@ -249,14 +251,16 @@ def deQueuecircular():
 def Queuecircular():
     global SIZE,array,front,rear
     while True:
-        vara=input("1.손님 예약, 2.예약 손님  입장")
+        vara=input("1.손님 예약, 2.예약 손님  입장, 3.종료")
         if vara=="1":
             name=input("예약하시는 손님의 이름을 적어주십시오")
             enQueuecircular(name)
         elif vara=="2":
             deQueuecircular()
+        elif vara=="3":
+            return
         else:
-            print("1~2의 숫자만 입력 하십시오.")
+            print("1~3의 숫자만 입력 하십시오.")
 
 rear=9
 front=9
@@ -321,14 +325,16 @@ def deQueuelist():
 def Queuelist():
     global frontlist,rearlist
     while True:
-        varl=(input("1.손님 예약, 2.예약손님 입장"))
+        varl=(input("1.손님 예약, 2.예약 손님 입장, 3.종료"))
         if varl=="1":
             name=input("예약하시는 손님의 이름을 적어주십시오")
             enQueuelist(name)
         elif varl=="2":
             deQueuelist()
+        elif varl=="3":
+            return
         else:
-            print("1~2의 숫자만 입력 하십시오.")
+            print("1~3의 숫자만 입력 하십시오.")
 
 rearlist=Node()
 frontlist=Node()
