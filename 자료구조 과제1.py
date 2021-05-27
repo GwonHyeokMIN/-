@@ -2,18 +2,20 @@ class graph():
     def __init__(self):
         self.data = None
         self.ne = []
+        self.nei = []
         self.iv = None
         
-f = open('graph_info.txt', 'r')
-line_data = f.readline()
-line_save=[]
-while line_data:
-    line_save.append(line_data)
-    print("%s" %line_data, end="")
-    print("\n")
-    line_data = f.readline()
-f.close
+#f = open('graph_info.txt', 'r')
+#line_data = f.readline()
+#line_save=[]
+#while line_data:
+    #line_save.append(line_data)
+    #print("%s" %line_data, end="")
+    #print("\n")
+    #line_data = f.readline()
+#f.close
 
+    
 A,B,C,D,E,F,G,current = graph(),graph(),graph(),graph(),graph(),graph(),graph(),graph()
 A.data,B.data,C.data,D.data,E.data,F.data,G.data = "A","B","C","D","E","F","G"
 A.ne.append("B"), A.ne.append("C")
@@ -24,13 +26,12 @@ E.ne.append("B"), E.ne.append("C"), E.ne.append("G")
 G.ne.append("D"), G.ne.append("E"), G.ne.append("F")
 F.ne.append("G")
 A.iv,B.iv,C.iv,D.iv,E.iv,F.iv = B,C,D,E,F,G
-exist = []
-save = []
+visited = []
+stack = []
 
-def print_graph():
-    global A,B,C,D,E,F,G,current
+def graph_print():
     current = A
-    while current.iv != None:
+    while current != None:
         print(current.data,": {",end = "")
         n = len(current.ne)
         for i in range(0,n):
@@ -38,63 +39,82 @@ def print_graph():
         print("}")
         current = current.iv
 
-def graph_Search():
-    global A,B,C,D,E,F,G,current,exist
-    n = len(current.ne)
-    m = len(exist)
-    for i in range(0,n):
-        for j in range(0,m):
-            if current.ne[i] == exist[j]:
-                break
-            elif (j == m-1) and (current.ne[i] != exist[j]) ==1:
-                return False # exist 에 존재하지 않음
-        if (i == n-1) and (j == m-1) and (current.ne[i] == exist[j]) ==1:
-            return True # exist 에 전부 존재함
+def print_graph():
+    current = A
+    while current != None:
+        print(current.data,": {",end = "")
+        n = len(current.nei)
+        for i in range(0,n):
+            print("(",current.data,",",current.nei[i],")",end="")
+        print("}")
+        current = current.iv
 
-def graph_BFS():
-    global A,B,C,D,E,F,G,current,exist,save
-    vertex = input(print("BFS를 시작할 지점을 입력하시오: "))
+def graph_edge():
+    current = A
+    var = 0
+    while current != None:
+        var += len(current.nei)
+        current = current.iv
+    return var
+
+def graph_visited(vertex):
+    global visited
+    n = len(visited)
+    if n == 0:
+        return False
+    else:
+        for i in range (0,n):
+            if vertex.data == visited[i]:
+                return True #vertex가 이미 지나온 vertex인경우 True 값을 반환한다.
+            elif ((i == n-1) and (vertex.data != visited[i])) == 1:
+                return False #vertex가 지나온 vertex가 아닌경우 False 값을 반환한다.
+        
+def graph_search(vertexdata):
     current = A
     while current.iv != None:
-        if current.data == vertex:
+        if current.data == vertexdata:
             break
         else:
             current = current.iv
-    exist.append(current.data)
-    save.append(current.data)
-    while len(exist) <= 7:
-        print(exist)
-        if graph_Search() == False:# 이미 지나온 vertex를 제외한 이웃한 vertex로 이동한다.
-            n = len(current.ne)
-            m = len(exist)
-            var = True
-            for i in range(0, n):
-                for j in range(0, m):
-                    if (j == m-1) and (current.ne[i] != exist[j]) ==1:
-                        if current.iv != None:
-                            if current.data == current.ne[i]:
-                                break
-                            else:
-                                current = current.iv
-                        var = False
-                        break
-                if var == False:
-                    break
-            exist.append(current.data)
-            save.append(current.data)
-                    
-        elif graph_Search() == True:# 더이상 갈 수있는 edge가 없으면 그전 단계로 돌아간다.
-            save.pop()
-            n = len(save)
-            while current.iv != None:
-                if current.data == save[n-1]:
-                    break
-                else:
-                    current = current.iv
-
-graph_BFS()
+    return current
     
+
+def graph_DFS(vertex):
+    if (graph_edge() == 12):
+        return
+    else:
+        visited.append(vertex.data)
+        n = len(vertex.ne)
+        for i in range(0,n):
+            if graph_visited(graph_search(vertex.ne[i])) == False:
+                stack.append(vertex.data)
+                vertex.nei.append(vertex.ne[i])
+                graph_search(vertex.ne[i]).nei.append(vertex.data)
+                vertex = graph_search(vertex.ne[i])
+                graph_BFS(vertex)
+                break
+            elif (i == n-1) and (graph_visited(graph_search(vertex.ne[i])) == True) == 1:
+                m = len(stack)
+                vertex = graph_search(stack[m-1])
+                stack.pop()
+                graph_BFS(vertex)
+                
+                
+def graph_BFS(vertex):
+    visited.append(vertex.data)
+    n = len(vertex.ne)
+    for i in range(0,n):
+        if graph_visited(graph_search(vertex.ne[i])) == False:
+            vertex.nei.append(vertex.ne[i])
+            graph_search(vertex.ne[i]).nei.append(vertex.data)
+            stack.append(vertex.ne[i])
+            visited.append(vertex.ne[i])
             
+    if len(stack)>=1:
+        save = stack[0]
+        del stack[0]
+        graph_BFS(graph_search(save))
+        
         
 
 
