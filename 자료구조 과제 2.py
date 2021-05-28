@@ -40,12 +40,61 @@ def Quick_sort(array,s,n): #s는 array의 시작점 n은 array의 끝점
 
             else: #i가 L값에 도착하기 전에
                 if array[i] <= array[pivot_number]: #array[i]값이 피봇값보다 작다면
-                    R = i
-                    var = array[R] #R 과 L의 값을 서로 바꿔준다.
-                    array[R] = array[L]
-                    array[L] = var
-                    Quick_sort(array,s,n) # 피봇값 을 기준으로 좌우가 구분될때 까지 계속한다.
-                    return array
+                    if array[i] <= array[pivot_number]: #array[i]값이 피봇값보다 작다면
+                        R = i
+                        var = array[R] #R 과 L의 값을 서로 바꿔준다.
+                        array[R] = array[L]
+                        array[L] = var
+                        Quick_sort_swap(array,L+1,R-1,pivot_number) # 피봇값 을 기준으로 좌우가 구분될때 까지 계속한다.
+                        if result == 2:
+                            Quick_sort(array,s,R-1)
+                            return array
+                        elif result == 3:
+                            var = array[R]
+                            array[R] = array[pivot_number]
+                            array[pivot_number] = var
+                            Quick_sort(array,s,R-1)
+                            return array
+                        elif result == 4:
+                            var = array[pivot_number]
+                            array[pivot_number] = array[L]
+                            array[L] = var
+                            Quick_sort(array,s,L-1)
+                            Quick_sort(array,L+1,n)
+                            return array
+                        else:
+                            Quick_sort(array,s,n) # Quick_sort 시킨다.
+                            return array
+
+def Quick_sort_swap(array,s,n,pivot_number): # L값과 R값을 바꾸는 함수 이다.
+    global result
+    L,R,var,result = s,n,0,0
+    if n-s+1 <= 1:
+        result = 1
+        return result
+    else:
+        for i in range (s,n+1): #i를 s부터 n 까지 1씩 증가시킨다.
+            if i == R:
+                if array[R] >= array[pivot_number]:
+                    result = 2
+                    return result
+                else:
+                    result = 3
+                    return result
+            else: # L이 끝까지 가지 않은경우
+                if array[i] > array[pivot_number]: # L값이 피봇값보다 큰경우
+                    L = i #L을 i라고한다.
+                    for j in range (n,s-1,-1): # j를 n부터 s까지 1씩 감소시킨다.
+                        if j == L:
+                            result = 4
+                            return result
+                        else: #R 이 L까지 가지않은경우
+                            if array[j] <= array[pivot_number]: #R값이 피봇보다 작거나 같은경우
+                                R = j #R을 j라고한다.
+                                var = array[R]
+                                array[R] = array[L]
+                                array[L] = var #L값과 R값을 바꾼다.
+                                Quick_sort_swap(array,L+1,R-1,pivot_number) #L+1부터 R-1까지 Quick_sort_swap 시킨다.
                     
 def Selection_sort(array):
     n = len(array) #array 의 길이를 확인한다.
@@ -61,7 +110,10 @@ def Selection_sort(array):
     return array
                 
             
-array = [1,2,4,9,7,4,5,3,7,8,213,123,123,14,12,41,521,231,41,23,15,12,512,312,31,4122,412,31,41]
+array = [1,2,4,9,7,23,14,12,41,521,231,41,23,15,12,512,312,31,4122,412,31,4,\
+         1,2,4,9,7,23,14,12,41,521,231,41,23,15,12,512,312,31,4122,412,31,4,\
+         1,2,4,9,7,23,14,12,41,521,231,41,23,15,12,512,312,31,4122,412,31,4,\
+         ]
 print("array =",array)
 print("array의 길이는",len(array),"입니다.")
 n = len(array)-1
@@ -76,8 +128,13 @@ end_time2 = datetime.datetime.now()
 elapse_time2 = end_time2 - start_time2
 print(elapse_time1)   #Quick_sort 의 걸린 시간을 출력한다.
 print(elapse_time2)   #Selection_sort 의 걸린 시간을 출력한다.
+if Quick_sort(array,0,n) == Selection_sort(array):
+    print("일치합니다")
+else:
+    print("일치하지않습니다.")
 if elapse_time1 > elapse_time2:
     print("Selection_sort가 더 빠릅니다.")
 else:
     print("Quick_sort가 더 빠릅니다.")
                
+
