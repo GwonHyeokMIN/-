@@ -33,7 +33,7 @@ def Quick_sort(array,s,n): #s는 array의 시작점 n은 array의 끝점
             if i == L: #i 가 L값에 도착했을때,
                 var = array[pivot_number] # L과 피봇값을 교환한다.
                 array[pivot_number] = array[L]
-                array[pivot_number] = var  #교환된 값을 기준으로 왼쪽은작고 오른쪽은 크다
+                array[L] = var  #교환된 값을 기준으로 왼쪽은작고 오른쪽은 크다
                 Quick_sort(array,s,L-1)  #왼쪽 부분을 Quick_sort시킨다
                 Quick_sort(array,L+1,n)  #오른쪽 부분을 Quick_sort시킨다
                 return array
@@ -61,7 +61,7 @@ def Selection_sort(array):
     return array
                 
             
-array = [1,2,4,9,7,4,5,3,7,8]
+array = [1,2,4,9,7,4,5,3,7,8,213,123,123,14,12,41,521,231,41,23,15,12,512,312,31,4122,412,31,41]
 print("array =",array)
 print("array의 길이는",len(array),"입니다.")
 n = len(array)-1
@@ -81,4 +81,3 @@ if elapse_time1 > elapse_time2:
 else:
     print("Quick_sort가 더 빠릅니다.")
                
-            
