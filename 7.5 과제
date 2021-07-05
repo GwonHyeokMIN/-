@@ -1,0 +1,139 @@
+import os
+import cv2 as cv
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+def Selection_sort(array):
+    n = len(array) 
+    for i in range(0, n-1, 1): 
+        minldx = i 
+        for k in range(i+1, n, 1): 
+            if(array[minldx] > array[k]): 
+                minldx = k 
+        tmp = array[i] 
+        array[i] = array[minldx]
+        array[minldx] = tmp
+
+    return array
+
+def Quick_sort(array,s,n): 
+    if n-s+1 <= 1: 
+        return array
+    else: 
+        L,R,var = s+1,n,0
+        pivot_number = s
+        pivot = array[pivot_number]
+        while L != R: 
+
+            while L < n: 
+                if array[L] > pivot: 
+                    break 
+                L+=1 
+
+            while R > L: 
+                if array[R] < pivot: 
+                    break
+                R-=1 
+
+            if L < R : 
+                var = array[L] 
+                array[L] = array[R]
+                array[R] = var
+                             
+        if array[L] > pivot: 
+            L -= 1 
+        var = array[L] 
+        array[L] = pivot
+        array[pivot_number] = var
+        Quick_sort(array,L+1,n) 
+        Quick_sort(array,s,L-1)
+        return array
+
+
+def convolution(img,mask,stride):
+    col = int(((img.shape[0]-mask.shape[0])/stride)+1)
+    row = int(((img.shape[1]-mask.shape[1])/stride)+1)
+    change_img = np.zeros((col,row,img.shape[2]))
+    a = 0
+    for i in range(0,img.shape[2]):
+        for j in range(0,col):
+            for k in range(0,row):
+                for x in range(0,mask.shape[0]):
+                    for y in range(0,mask.shape[1]):
+                        a += img[j*stride+x][k*stride+y][i]*mask[x][y]
+                change_img[j][k][i] = a
+                a = 0
+    return change_img
+
+def zero_padding(img,u,d,l,r):
+    col = img.shape[0]
+    row = img.shape[1]
+    padding_img = np.zeros((col+u+d,row+l+r,img.copy().shape[2]))
+    for i in range(0,img.shape[2]):
+        for j in range(0,col):
+            for k in range(0,row):
+                padding_img[u:-d,l:-r,i] = img[:,:,i] 
+    
+    return padding_img
+
+def average_filter(mask):
+    filter_mask = np.ones((mask.shape[0],mask.shape[1]))
+    sum_ = 0
+    for i in range(0,mask.shape[0]):
+        for j in range(0,mask.shape[1]):
+            sum_ += mask[i][j]
+    filter_mask /= sum_
+    return filter_mask
+
+def median_filter(mask):
+    filter_mask = mask.copy()
+    mask_list = np.concatenate(mask).tolist()
+    sort_list = Selection_sort(mask_list)
+    median = sort_list[((mask.shape[0]*mask.shape[1])//2)]
+    filter_mask[mask.shape[0]//2][mask.shape[1]//2] = median
+    return filter_mask
+
+def maximum_filter(mask):
+    filter_mask = mask.copy()
+    mask_list = np.concatenate(mask).tolist()
+    sort_list = Selection_sort(mask_list)
+    maximum = sort_list[((mask.shape[0]*mask.shape[1])-1)]
+    filter_mask[mask.shape[0]//2][mask.shape[1]//2] = maximum
+    return filter_mask
+
+def minimum_filter(mask):
+    filter_mask = mask.copy()
+    mask_list = np.concatenate(mask).tolist()
+    sort_list = Selection_sort(mask_list)
+    minimum = sort_list[0]
+    filter_mask[mask.shape[0]//2][mask.shape[1]//2] = minimum
+    return filter_mask
+
+def midpoint_filter(mask):
+    filter_mask = mask.copy()
+    mask_list = np.concatenate(mask).tolist()
+    sort_list = Selection_sort(mask_list)
+    minimum = sort_list[0]
+    maximum = maximum = sort_list[((mask.shape[0]*mask.shape[1])-1)]
+    midpoint = (minimum+maximum)/2.0
+    filter_mask[mask.shape[0]//2][mask.shape[1]//2] = midpoint
+    return filter_mask
+
+def alpha_filter(mask):
+    filter_mask = mask.copy()
+    mask_list = np.concatenate(mask).tolist()
+    sort_list = Selection_sort(mask_list)
+    mean = sum(sort_list[1:-1])/((mask.shape[0]*mask.shape[1])-2)
+    filter_mask[mask.shape[0]//2][mask.shape[1]//2] = mean
+    return filter_mask
+
+lena = cv2.imread("cat.jpg")
+lena = cv2.cvtColor(lena,cv2.COLOR_BGR2RGB)
+mask = np.array([[0,1,0],[0,-1,0],[0,0,0]],dtype=np.float32)/2
+mask2 = np.ones((5,5))/25
+img = convolution(lena,mask,1)
+plt.imshow(img.astype('uint8'))
+plt.show()
+
