@@ -1,0 +1,212 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# 1.영상의 Color & Histogram
+# =========
+# 
+# * Histogram 정의: 도수 분포를 나타내는 그래프를 뜻함
+# * 영상에서의 Histogram: 2차원(Color 차원 및 비디오의 시계열을 제외하고 말함) 영상에서 각 픽셀이 가지는 값(Intensity)의 분포를 표현함
+# * 가로축은 픽셀값, 세로축은 해당 픽셀값의 개수
+# 
+# **과제**
+# 1. RGB, CMYK, HSV Color Space 변환 코드 작성 및 출력 이미지
+# 2. Histogram 코드 작성 
+#     - plt.hist() / np.histogram() 등 함수 사용 불가. 
+#     - 단 plt.plot() 으로 histogram을 출력하는 것은 가능
+#     - Hint: cv2 로 이미지를 불러오면 기본적으로 0~255 사이의 Intensity 가짐. np.array or list 활용하여 Counting
+# 3. RGB Histogram 출력
+
+
+import os
+import cv2 as cv
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+def RGB2HSV(img):
+    r = img.copy()[:,:,0]/255.
+    g = img.copy()[:,:,1]/255.
+    b = img.copy()[:,:,2]/255.
+    h = img.copy()[:,:,0]/255.
+    s = img.copy()[:,:,0]/255.
+    v = np.max(img.copy()/255.,axis=2)
+    minimum = np.min(img.copy()/255.,axis=2)
+
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if v[i][j] == 0:
+                s[i][j] = 0
+            else:
+                s[i][j] = (v[i][j] - minimum[i][j])/v[i][j]
+
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if v[i][j] == r[i][j]:
+                h[i][j] = 30.*(b[i][j]-g[i][j])/(v[i][j]-minimum[i][j])
+            elif v[i][j] == g[i][j]:
+                h[i][j] = (30.*(r[i][j]-b[i][j])+2)/(v[i][j]-minimum[i][j])
+            else:
+                h[i][j] = (30.*(g[i][j]-r[i][j])+4)/(v[i][j]-minimum[i][j])
+            if h[i][j] < 0:
+                h[i][j] += 180
+            elif h[i][j] > 180:
+                h[i][j] -= 180
+
+    v *= 255
+    s *= 255
+    hsv_img = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2HSV)
+    print(hsv_img[:,:,0])
+    print(h)
+
+    hsv_img[:,:,0]=h
+    hsv_img[:,:,1]=s
+    hsv_img[:,:,2]=v
+    return hsv_img
+                    
+                
+
+def RGB2CMYK(img):
+    k = 1-np.max(img/255.,axis=2)
+    c = (1-img[:,:,2]/255.- k)/(1-k)
+    m = (1-img[:,:,1]/255 - k)/(1-k)
+    y = (1-img[:,:,0]/255 - k)/(1-k)
+    cmyk_img = (np.dstack((c,m,y,k))*255).astype(np.uint8)
+
+    return cmyk_img
+                
+            
+def histogram(img,data):
+    x_axis = np.array([0])
+    y_axis = np.array([0])
+    for i in range (0,data.shape[0]):
+        for j in range(0,data.shape[1]):
+            var = data[i][j]
+            for k in range(0,len(x_axis)):
+                if x_axis[k] == var:
+                    y_axis[k] += 1
+                    break
+
+                elif k == len(x_axis)-1:
+                    x_axis = np.append(x_axis,var)
+                    y_axis = np.append(y_axis,1)
+                    break
+                    
+    plt.plot(x_axis,y_axis,"or")
+    plt.show()
+
+def sliding(img,offset):
+    r = img.copy()[:,:,0]
+    g = img.copy()[:,:,1]
+    b = img.copy()[:,:,2]
+    
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if (r[i][j] + offset) > 255:
+                r[i][j] = 255
+            elif (r[i][j] + offset) < 0:
+                r[i][j] = 0
+            else:
+                r[i][j] += offset
+            if (g[i][j] + offset) > 255:
+                g[i][j] = 255
+            elif (g[i][j] + offset) < 0:
+                g[i][j] = 0
+            else:
+                g[i][j] += offset
+            if (b[i][j] + offset) > 255:
+                b[i][j] = 255
+            elif (b[i][j] + offset) < 0:
+                b[i][j] = 0
+            else:
+                b[i][j] += offset
+    img[:,:,0] = r
+    img[:,:,1] = g
+    img[:,:,2] = b
+    return img
+
+def stretching(img):
+    r = img.copy()[:,:,0]
+    g = img.copy()[:,:,1]
+    b = img.copy()[:,:,2]
+    r_max = np.max(np.max(r,axis=1))
+    r_min = np.min(np.min(r,axis=1))
+    g_max = np.max(np.max(g,axis=1))
+    g_min = np.min(np.min(g,axis=1))
+    b_max = np.max(np.max(b,axis=1))
+    b_min = np.min(np.min(b,axis=1))
+
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            r[i][j] = ((r[i][j]-r_min)/(r_max-r_min))*255
+            g[i][j] = ((g[i][j]-g_min)/(g_max-g_min))*255
+            b[i][j] = ((b[i][j]-b_min)/(b_max-b_min))*255
+    
+    img[:,:,0] = r
+    img[:,:,1] = g
+    img[:,:,2] = b
+    return img
+
+
+    
+    
+def otsu(img):
+    g = img.copy()
+    b = 0
+    max_b, max_T = 0,0
+    u0,n0 = 0,0
+    u1,n1 = 0,0
+    for T in range(0,255):
+        T += 1
+        for i in range(0,img.shape[0]):
+            for j in range(0,img.shape[1]):
+                if g[i][j] >= T:
+                    u1 += g[i][j]
+                    n1 += 1
+                else:
+                    u0 += g[i][j]
+                    n0 += 1
+        if (n0 == 0) or (n1 == 0) ==1:
+            pass
+        else:
+            u0 /= n0
+            u1 /= n1
+            w0 = n0/(img.shape[0]*img.shape[1])
+            w1 = 1-w0
+            b = w0*w1*(u0-u1)*(u0-u1)
+            if b > max_b:
+                max_b = b
+                max_T = T
+    return max_T
+
+
+def IB(img,g_mean):
+    g_mean1 = 0
+    g_u1,g_n1 = 0,0
+    g_u2,g_n2 = 0,0
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if g[i][j] >= g_mean:
+                g_u2 += g[i][j]
+                g_n2 += 1
+            else:
+                g_u1 += g[i][j]
+                g_n1 += 1
+    g_u1 /= g_n1
+    g_u2 /= g_n2
+    g_mean1 = (g_u1+g_u2)/2
+    if abs(g_mean-g_mean1)==0:
+        for i in range(0,img.shape[0]):
+            for j in range(0,img.shape[1]):
+                if g[i][j] < g_mean1:
+                    g[i][j] = 0
+                else:
+                    g[i][j] = 255
+        img = g
+        cv.imshow("",img)
+    else:
+        IB(img,g_mean1)
+        
+lena = cv.imread("lena.jpg")
+img = RGB2HSV(lena)
+cv.imshow(".",img)
+
