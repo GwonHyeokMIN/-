@@ -1,0 +1,72 @@
+import os
+import cv2 as cv
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as img
+import math
+import random
+
+def Nearest(img,size0,size1):
+    n_col = img.shape[0]+2*(img.shape[0]-1)*size0
+    n_row = img.shape[1]+2*(img.shape[1]-1)*size1
+    n_img = np.zeros((n_col,n_row,img.shape[2]))
+    for i in range(0,img.shape[2]):
+        for j in range(0, img.shape[0]):
+            for k in range(0, img.shape[1]):
+                for var0 in range(-size0,size0+1):
+                    for var1 in range(-size1,size1+1):
+                        n_j = j*(2*size0+1)+var0
+                        n_k = k*(2*size1+1)+var1
+                        if (n_j >= 0) and (n_j < n_col) == 1:
+                            if (n_k >= 0) and (n_k < n_row) == 1:
+                                n_img[n_j][n_k][i] = img[j][k][i]
+    
+    return n_img
+def Bilinear(img,size0,size1):
+    b_col = img.shape[0]+2*(img.shape[0]-1)*size0
+    b_row = img.shape[1]+2*(img.shape[1]-1)*size1
+    b_img = np.zeros((b_col,b_row,img.shape[2]))
+    for i in range(0,img.shape[2]):
+        for j in range(0, img.shape[0]):
+            for k in range(0, img.shape[1]):
+                b_j = j*(2*size0+1)
+                b_k = k*(2*size1+1)
+                b_img[b_j][b_k][i] = img[j][k][i]
+    for i in range(0,img.shape[2]):
+        for j in range(0, img.shape[0]):
+            for k in range(0, img.shape[1]):
+                for var0 in range(0,2*size0+1):
+                    for var1 in range(0,2*size1+1):
+                        b_j = j*(2*size0+1)+var0
+                        b_k = k*(2*size1+1)+var1
+                        p = var0/(2*size0)
+                        q = (2*size0-var0)/(2*size0)
+                        a = var1/(2*size1)
+                        b = (2*size1-var1)/(2*size1)
+                        if b_j < b_col:
+                            if b_k < b_row:
+                                if j == img.shape[0]-1:
+                                    if k == img.shape[1]-1:
+                                        pass
+                                    else:
+                                        b_data = b*img[j][k+1][i]+a*img[j][k][i]
+                                        b_img[b_j][b_k][i] = b_data
+
+                                elif k == img.shape[1]-1:
+                                    b_data = q*img[j][k][i]+p*img[j+1][k][i]
+                                    b_img[b_j][b_k][i] = b_data
+
+                                else:
+                                    b_data = q*b*img[j][k+1][i]+q*a*img[j][k][i]+p*b*img[j+1][k+1][i]+p*a*img[j+1][k][i]
+                                    b_img[b_j][b_k][i] = b_data
+                        
+    return b_img
+
+def Fourier(img)
+
+img = cv2.imread("lena.jpg")
+img = cv2.cvtColor(img,cv.COLOR_BGR2RGB)
+img = near(img,1,1)
+plt.imshow(img.astype('uint8'))
+plt.show()
