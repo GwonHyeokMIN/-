@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as img
 import math
+from math import exp
 import random
 
 def Nearest(img,size0,size1):
@@ -23,6 +24,7 @@ def Nearest(img,size0,size1):
                                 n_img[n_j][n_k][i] = img[j][k][i]
     
     return n_img
+
 def Bilinear(img,size0,size1):
     b_col = img.shape[0]+2*(img.shape[0]-1)*size0
     b_row = img.shape[1]+2*(img.shape[1]-1)*size1
@@ -63,11 +65,87 @@ def Bilinear(img,size0,size1):
                         
     return b_img
 
-def Fourier(img)
+def shuffling(img):
+    col_cen = (col//2)-1
+    row_cen = (row//2)-1
+    s_img = np.zeros((col,row))
+    for i in range(0,col):
+        for j in range(0,row):
+            if i <= col_cen:
+                if j <= row_cen:
+                    s_img[i+col_cen][j+row_cen] = img[i][j]
+                else:
+                    s_img[i+col_cen][j-row_cen] = img[i][j]
+            else:
+                if j<= row_cen:
+                    s_img[i-col_cen][j+row_cen] = img[i][j]
+                else:
+                    s_img[i-col_cen][j-row_cen] = img[i][j]
+    return s_img
 
-img = cv2.imread("lena.jpg")
-img = cv2.cvtColor(img,cv.COLOR_BGR2RGB)
-img = near(img,1,1)
-plt.imshow(img.astype('uint8'))
+def spectrum(img_real,img_imag):
+    img = np.zeros((col,row))
+    for i in range(0,col):
+        for j in range(0,row):
+            img[i][j] = math.sqrt(math.pow(img_real[i][j],2)+math.pow(img_imag[i][j],2))
+    return img
+
+
+def Fourier(img):
+    data_real = 0
+    data_imag = 0
+    a=(1/(col*row))
+    b=(-1)*2*math.pi
+    f_img_real = np.zeros((col,row))
+    f_img_imag = np.zeros((col,row))
+    for u in range(0,col):
+        for v in range(0,row):
+            for i in range(0,col):
+                for j in range(0,row):
+                    data_real += img[i][j]*a*math.cos(b*(((u*i)/col)+((v*j)/row)))
+                    data_imag += img[i][j]*a*math.sin(b*(((u*i)/col)+((v*j)/row)))
+            f_img_real[u][v] = data_real
+            f_img_imag[u][v] = data_imag
+            data_real = 0
+            data_imag = 0
+        print((((u+1))/(col)*100))
+
+    return f_img_real,f_img_imag
+
+def inverse_fourier(img_real,img_imag):
+    data_real = 0
+    data_imag = 0
+    b=2*math.pi
+    f_img = np.zeros((col,row))
+    for u in range(0,col):
+        for v in range(0,row):
+            for i in range(0,col):
+                for j in range(0,row):
+                    data_real += img_real[i][j]*(math.cos(b*(((u*i)/col)+((v*j)/row))))+img_imag[i][j]*(math.sin(b*(((u*i)/col)+((v*j)/row))))*(-1)
+                    data_imag += img_real[i][j]*(math.sin(b*(((u*i)/col)+((v*j)/row))))+img_imag[i][j]*(math.cos(b*(((u*i)/col)+((v*j)/row))))
+            f_img[u][v] = data_real+data_imag
+            data_real = 0
+            data_imag = 0
+        print((((u+1))/(col)*100))
+    return f_img
+
+def blour(img):
+    for i in range(45,55):
+        for j in range(45,55):
+            img[i][j] = 0
+    return img
+            
+img = cv2.imread("eagle1.png",cv.IMREAD_GRAYSCALE)
+col = img.shape[0]
+row = img.shape[1]
+real,imag = Fourier(img)
+real = shuffling(real)
+imag = shuffling(imag)
+real = blour(real)
+imag = blour(imag)
+real = shuffling(real)
+imag = shuffling(imag)
+img = inverse_fourier(real,imag)
+plt.imshow(img,cmap=plt.cm.gray)
 plt.show()
 
