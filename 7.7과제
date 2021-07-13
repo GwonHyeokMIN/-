@@ -73,14 +73,14 @@ def shuffling(img):
         for j in range(0,row):
             if i <= col_cen:
                 if j <= row_cen:
-                    s_img[i+col_cen][j+row_cen] = img[i][j]
+                    s_img[i+col_cen+1][j+row_cen+1] = img[i][j]
                 else:
-                    s_img[i+col_cen][j-row_cen] = img[i][j]
+                    s_img[i+col_cen+1][j-row_cen-1] = img[i][j]
             else:
                 if j<= row_cen:
-                    s_img[i-col_cen][j+row_cen] = img[i][j]
+                    s_img[i-col_cen-1][j+row_cen+1] = img[i][j]
                 else:
-                    s_img[i-col_cen][j-row_cen] = img[i][j]
+                    s_img[i-col_cen-1][j-row_cen-1] = img[i][j]
     return s_img
 
 def spectrum(img_real,img_imag):
@@ -89,7 +89,6 @@ def spectrum(img_real,img_imag):
         for j in range(0,row):
             img[i][j] = math.sqrt(math.pow(img_real[i][j],2)+math.pow(img_imag[i][j],2))
     return img
-
 
 def Fourier(img):
     data_real = 0
@@ -121,21 +120,26 @@ def inverse_fourier(img_real,img_imag):
         for v in range(0,row):
             for i in range(0,col):
                 for j in range(0,row):
-                    data_real += img_real[i][j]*(math.cos(b*(((u*i)/col)+((v*j)/row))))+img_imag[i][j]*(math.sin(b*(((u*i)/col)+((v*j)/row))))*(-1)
-                    data_imag += img_real[i][j]*(math.sin(b*(((u*i)/col)+((v*j)/row))))+img_imag[i][j]*(math.cos(b*(((u*i)/col)+((v*j)/row))))
-            f_img[u][v] = data_real+data_imag
+                    data_real += img_real[i][j]*(math.cos(b*(((u*i)/col)+((v*j)/row))))-img_imag[i][j]*(math.sin(b*(((u*i)/col)+((v*j)/row))))
+            if data_real < 0:
+                f_img[u][v] = -data_real
+            else:
+                f_img[u][v] = data_real
             data_real = 0
             data_imag = 0
         print((((u+1))/(col)*100))
     return f_img
 
 def blour(img):
-    for i in range(45,55):
-        for j in range(45,55):
+    for i in range(8,13):
+        for j in range(46,54):
+            img[i][j] = 0
+    for i in range(86,93):
+        for j in range(46,54):
             img[i][j] = 0
     return img
             
-img = cv2.imread("eagle1.png",cv.IMREAD_GRAYSCALE)
+img = cv2.imread("eagle2.png",cv.IMREAD_GRAYSCALE)
 col = img.shape[0]
 row = img.shape[1]
 real,imag = Fourier(img)
@@ -143,9 +147,6 @@ real = shuffling(real)
 imag = shuffling(imag)
 real = blour(real)
 imag = blour(imag)
-real = shuffling(real)
-imag = shuffling(imag)
 img = inverse_fourier(real,imag)
 plt.imshow(img,cmap=plt.cm.gray)
 plt.show()
-
