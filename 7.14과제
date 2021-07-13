@@ -1,0 +1,223 @@
+import os
+import cv2 as cv
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as img
+import math
+from math import exp
+import random
+from PIL import Image
+
+def dilation(img):
+    ker = np.ones((5,5),int)
+    a = ker.shape[0]//2
+    b = ker.shape[1]//2
+    img_p = np.pad(img, ((b,b),(a,a)), 'constant',constant_values = 0)
+    img_d = np.zeros((img.shape[0],img.shape[1]),int)
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            for u in range(0,ker.shape[0]):
+                for v in range(0,ker.shape[1]):
+                    if (ker[u][v] == 1)and(img_p[i+u][j+v] == 255) == 1:
+                        img_d[i][j] = 255
+    return img_d
+
+def erosion(img):
+    ker = np.ones((5,5),int)
+    a = ker.shape[0]//2
+    b = ker.shape[1]//2
+    img_p = np.pad(img, ((b,b),(a,a)), 'constant',constant_values = 0)
+    img_e = np.ones((img.shape[0],img.shape[1]),int)*255
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            for u in range(0,ker.shape[0]):
+                for v in range(0,ker.shape[1]):
+                    if (ker[u][v] == 1)and(img_p[i+u][j+v] == 0) == 1:
+                        img_e[i][j] = 0
+            
+    return img_e
+
+def opening(img):
+    img = erosion(img)
+    img = dilation(img)
+    return img
+
+def closing(img):
+    img = dilation(img)
+    img = erosion(img)
+    return img
+
+def gaussian_pyramid(img_o):
+    img = cv2.GaussianBlur(img_o,(5,5),4)
+    col,row = 0,0
+    if img.shape[0]%2 == 0:
+        col = int(img.shape[0]//2)
+    else:
+        col = int((img.shape[0]//2)+1)
+    if img.shape[1]%2 == 0:
+        row = int(img.shape[1]//2)
+    else:
+        row = int((img.shape[1]//2)+1)
+    imgp = np.zeros((col,row))
+    for i in range(0,col):
+        for j in range(0,row):
+            imgp[i][j] = img[(2*i)][(2*j)]
+    return imgp
+
+def I(c,s):
+    imgIc,imgIs = imgI,imgI
+    for i in range(0,c):
+        imgIc = gaussian_pyramid(imgIc.copy())
+    for j in range(0,s):
+        imgIs = gaussian_pyramid(imgIs.copy())
+    imgIs_resize = cv2.resize(imgIs,dsize=(imgIc.shape[1],imgIc.shape[0]),interpolation=cv2.INTER_LINEAR)
+    img = imgIc-imgIs_resize
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if img[i][j] < 0:
+                img[i][j] = 0
+
+    return img
+
+def RG(c,s):
+    imgRc,imgRs = imgR,imgR
+    imgGc,imgGs = imgG,imgG
+    for i in range(0,c):
+        imgRc = gaussian_pyramid(imgRc.copy())
+        imgGc = gaussian_pyramid(imgGc.copy())
+    for j in range(0,s):
+        imgRs = gaussian_pyramid(imgRs.copy())
+        imgGs = gaussian_pyramid(imgGs.copy())
+    imgGs_Rs = imgGs-imgRs
+    for i in range(0, imgRs.shape[0]):
+        for j in range(0,imgRs.shape[1]):
+            if imgGs_Rs[i][j] < 0:
+                imgGs_Rs[i][j] = 0
+    imgGs_Rs_resize = cv2.resize(imgGs_Rs,dsize=(imgRc.shape[1],imgRc.shape[0]),interpolation=cv2.INTER_LINEAR)
+    imgRc_Gc = imgRc - imgGc
+    for i in range(0,imgRc.shape[0]):
+        for j in range(0,imgRc.shape[1]):
+            if imgRc_Gc[i][j] < 0:
+                imgRc_Gc[i][j] = 0
+    img = imgRc_Gc-imgGs_Rs_resize
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if img[i][j] < 0:
+                img[i][j] = 0
+
+    return img
+
+def BY(c,s):
+    imgBc,imgBs = imgB,imgB
+    imgYc,imgYs = imgY,imgY
+    for i in range(0,c):
+        imgBc = gaussian_pyramid(imgBc.copy())
+        imgYc = gaussian_pyramid(imgYc.copy())
+    for j in range(0,s):
+        imgBs = gaussian_pyramid(imgBs.copy())
+        imgYs = gaussian_pyramid(imgYs.copy())
+    imgYs_Bs = imgYs-imgBs
+    for i in range(0, imgBs.shape[0]):
+        for j in range(0,imgBs.shape[1]):
+            if imgYs_Bs[i][j] < 0:
+                imgYs_Bs[i][j] = 0
+    imgYs_Bs_resize = cv2.resize(imgYs_Bs,dsize=(imgBc.shape[1],imgBc.shape[0]),interpolation=cv2.INTER_LINEAR)
+    imgBc_Yc = imgBc - imgYc
+    for i in range(0,imgBc.shape[0]):
+        for j in range(0,imgBc.shape[1]):
+            if imgBc_Yc[i][j] < 0:
+                imgBc_Yc[i][j] = 0
+    img = imgBc_Yc-imgYs_Bs_resize
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if img[i][j] < 0:
+                img[i][j] = 0
+    
+    return img
+
+def O(c,s,thetha):
+    kernel = cv2.getGaborKernel((20,20),5,thetha,10,1,0)
+    kernel /= math.sqrt((kernel*kernel).sum())
+    imgOthethac = cv.filter2D(imgI,-1,kernel)
+    imgOthethas = cv.filter2D(imgI,-1,kernel)
+    for i in range(0,c):
+        imgOthethac = gaussian_pyramid(imgOthethac.copy())
+    for j in range(0,s):
+        imgOthethas = gaussian_pyramid(imgOthethas.copy())
+    imgOthethas_resize = cv2.resize(imgOthethas,dsize=(imgOthethac.shape[1],imgOthethac.shape[0]),interpolation=cv2.INTER_LINEAR)
+    img = imgOthethac - imgOthethas_resize
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if img[i][j] < 0:
+                img[i][j] = 0
+
+    return img
+
+def Normalization(min_c,max_c,min_s,max_s):
+    local_maximum = 0
+    global_maximum = 0
+    for i in range(min_c,max_c+1):
+        for j in range(min_s,max_s+1):
+            maxI = np.max(I(i,i+j))
+            maxRG = np.max(RG(i,i+j))
+            maxBY = np.max(BY(i,i+j))
+            maxO_0 = np.max(O(i,i+j,0))
+            maxO_45 = np.max(O(i,i+j,45))
+            maxO_90 = np.max(O(i,i+j,90))
+            maxO_135 = np.max(O(i,i+j,135))
+            local_maximum += maxI+maxRG+maxBY+maxO_0+maxO_45+maxO_90+maxO_135
+            if global_maximum < max(maxI,maxRG,maxBY,maxO_0,maxO_45,maxO_90,maxO_135):
+                global_maximum = max(maxI,maxRG,maxBY,maxO_0,maxO_45,maxO_90,maxO_135)
+    local_maximum /= 42
+    return local_maximum,global_maximum
+                                
+def scale_combinations(min_c,max_c,min_s,max_s,M,m):
+    inte = np.zeros((30,40))
+    colo = np.zeros((30,40))
+    orie = np.zeros((30,40))
+    for i in range(min_c,max_c+1):
+        for j in range(min_s,max_s+1):
+            inte += cv2.resize(I(i,i+j)*math.pow(M-m,2),dsize=(40,30),interpolation=cv2.INTER_AREA)
+            colo += cv2.resize(RG(i,i+j)*math.pow(M-m,2)+BY(i,i+j)*math.pow(M-m,2),dsize=(40,30),interpolation=cv2.INTER_AREA)
+            orie += cv2.resize(O(i,i+j,0)*math.pow(M-m,2)+O(i,i+j,45)*math.pow(M-m,2)+O(i,i+j,90)*math.pow(M-m,2)+O(i,i+j,135)*math.pow(M-m,2),dsize=(40,30),interpolation=cv2.INTER_AREA)
+    return inte,colo,orie            
+                            
+
+def saliency_map(img):
+    global imgI,imgR,imgG,imgB,imgY
+    imgR = np.zeros((img.shape[0],img.shape[1]))
+    imgG = np.zeros((img.shape[0],img.shape[1]))
+    imgB = np.zeros((img.shape[0],img.shape[1]))
+    imgY = np.zeros((img.shape[0],img.shape[1]))
+    for i in range(0,img.shape[0]):
+        for j in range(0,img.shape[1]):
+            if (img[i,j,0]-(img[i,j,1]/2+img[i,j,2]/2)) > 0:
+                imgR[i][j] = img[i,j,0]-(img[i,j,1]/2+img[i,j,2]/2)
+            else:
+                imgR[i][j] = 0
+            if (img[i,j,1]-(img[i,j,0]/2+img[i,j,2]/2)) > 0:
+                imgG[i][j] = img[i,j,1]-(img[i,j,0]/2+img[i,j,2]/2)
+            else:
+                imgG[i][j] = 0
+            if (img[i,j,2]-(img[i,j,0]/2+img[i,j,1]/2)) > 0:
+                imgB[i][j] =img[i,j,2]-(img[i,j,0]/2+img[i,j,1]/2)
+            else:
+                imgB[i][j] = 0
+            if ((img[i,j,0]/2+img[i,j,1]/2)-((np.abs(img[i,j,0]/2-img[i,j,1]/2)))-img[i,j,2]) > 0:
+                imgY[i][j] =  ((img[i,j,0]/2+img[i,j,1]/2)-((np.abs(img[i,j,0]/2-img[i,j,1]/2)))-img[i,j,2])
+            else:
+                imgY[i][j] = 0
+    imgI = (img[:,:,0]/3+img[:,:,1]/3+img[:,:,2]/3)
+    local_max,global_max = Normalization(2,4,3,4)
+    I,C,O = scale_combinations(2,4,3,4,global_max,local_max)
+    img = ((I+C+O)/3)
+    return img
+
+    
+
+img = cv2.imread("input_2.PNG")
+img = cv2.cvtColor(img,cv.COLOR_BGR2RGB)
+img = saliency_map(img)
+plt.imshow(img,cmap=plt.cm.gray)
+plt.show()
